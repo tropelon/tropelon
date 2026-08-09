@@ -1,28 +1,51 @@
-name: tropelon
-description: Tropelon BD hub app — AI, digital innovation, tech & education content aggregator
-publish_to: 'none'
-version: 1.0.0+1
+name: Build Tropelon APK
 
-environment:
-  sdk: '>=3.0.0 <4.0.0'
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
 
-dependencies:
-  flutter:
-    sdk: flutter
-  cupertino_icons: ^1.0.6
-  http: ^1.2.0
-  webview_flutter: ^4.7.0
-  connectivity_plus: ^6.0.3
-  cached_network_image: ^3.3.1
-  url_launcher: ^6.2.5
-  xml: ^6.5.0
-  share_plus: ^9.0.0
-  shared_preferences: ^2.2.3
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
 
-dev_dependencies:
-  flutter_test:
-    sdk: flutter
-  flutter_lints: ^3.0.0
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
 
-flutter:
-  uses-material-design: true
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.0'
+          channel: 'stable'
+
+      - name: Scaffold Android platform folder
+        run: |
+          flutter create --platforms=android --org com.tropelon --project-name tropelon /tmp/scaffold
+          cp -r /tmp/scaffold/android ./
+
+      - name: Add custom URL scheme for deep links
+        run: sed -i 's@</activity>@<intent-filter><action android:name="android.intent.action.VIEW" /><category android:name="android.intent.category.DEFAULT" /><category android:name="android.intent.category.BROWSABLE" /><data android:scheme="tropelon" /></intent-filter></activity>@' android/app/src/main/AndroidManifest.xml
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Generate app icon
+        run: flutter pub run flutter_launcher_icons
+
+      - name: Generate splash screen
+        run: flutter pub run flutter_native_splash:create
+
+      - name: Build APK
+        run: flutter build apk --release
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: tropelon-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
