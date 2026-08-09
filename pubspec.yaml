@@ -15,14 +15,31 @@ dependencies:
   connectivity_plus: ^6.0.3
   cached_network_image: ^3.3.1
   url_launcher: ^6.2.5
-  xml: ^6.5.0
-  share_plus: ^9.0.0
-  shared_preferences: ^2.2.3
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^3.0.0
+  flutter_launcher_icons: ^0.14.1
+  flutter_native_splash: ^2.4.1
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/icon/icon.png
+    - assets/splash/splash_logo.png
+
+# App icon config — run: flutter pub run flutter_launcher_icons
+# CI does this automatically before building the APK.
+flutter_launcher_icons:
+  android: true
+  image_path: "assets/icon/icon.png"
+
+# Splash screen config — run: flutter pub run flutter_native_splash:create
+# CI does this automatically before building the APK.
+flutter_native_splash:
+  color: "#7C3AED"
+  image: "assets/splash/splash_logo.png"
+  android_12:
+    color: "#7C3AED"
+    image: "assets/splash/splash_logo.png"
